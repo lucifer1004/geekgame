@@ -1,0 +1,12 @@
+[package]
+name = "lucifer1004/future-machine"
+version = "0.1.0"
+description = "A simple encoder/decoder"
+readme = "README.md"
+repository = "https://github.com/lucifer1004/geekgame/2021/future-machine"
+license = "MIT"
+
+[[module]]
+name = "future_machine"
+source = "target/wasm32-wasi/release"
+abi = "wasi"

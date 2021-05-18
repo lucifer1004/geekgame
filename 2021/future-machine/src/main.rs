@@ -1,7 +1,7 @@
 mod lib;
 
-use crate::lib::{decode, encode};
 use clap::{AppSettings, Clap};
+use lib::{decode, encode};
 
 /// An encoding/decoding tool.
 #[derive(Clap)]
@@ -24,14 +24,32 @@ struct Opts {
     modulo: usize,
     /// Decode instead of encode
     #[clap(short, long)]
-    decode_mode: bool
+    decode_mode: bool,
 }
 
 fn main() {
     let opts: Opts = Opts::parse();
     if opts.decode_mode {
-        println!("{}", decode(opts.input.as_str(), opts.iv, opts.mul, opts.offset, opts.modulo));
+        println!(
+            "{}",
+            decode(
+                opts.input.as_str(),
+                opts.iv,
+                opts.mul,
+                opts.offset,
+                opts.modulo
+            )
+        );
     } else {
-        println!("{}", encode(opts.input.as_str(), opts.iv, opts.mul, opts.offset, opts.modulo));
+        println!(
+            "{}",
+            encode(
+                opts.input.as_str(),
+                opts.iv,
+                opts.mul,
+                opts.offset,
+                opts.modulo
+            )
+        );
     }
 }
