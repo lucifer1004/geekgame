@@ -44,16 +44,34 @@ function emojifyNumber(num) {
 }
 
 function addPair(a, b) {
-  for (let x of larger.get(a)) {
-    larger.get(b).add(x)
-    smaller.get(x).add(b)
-  }
-  for (let x of smaller.get(b)) {
-    smaller.get(a).add(x)
-    larger.get(x).add(a)
+  if (!smaller.get(a).has(b)) {
+    console.debug(`New relationship learned: ${a} > ${b}`)
   }
   smaller.get(a).add(b)
   larger.get(b).add(a)
+  for (let x of smaller.get(b)) {
+    if (!smaller.get(a).has(x)) {
+      console.debug(`New relationship learned: ${a} > ${x}`)
+    }
+    smaller.get(a).add(x)
+    larger.get(x).add(a)
+  }
+  for (let x of larger.get(a)) {
+    if (!smaller.get(x).has(b)) {
+      console.debug(`New relationship learned: ${x} > ${b}`)
+    }
+    smaller.get(x).add(b)
+    larger.get(b).add(x)
+  }
+  for (let x of larger.get(a)) {
+    for (let y of smaller.get(b)) {
+      if (!smaller.get(x).has(y)) {
+        console.debug(`New relationship learned: ${x} > ${y}`)
+      }
+      smaller.get(x).add(y)
+      larger.get(y).add(x)
+    }
+  }
 }
 
 function restoreData() {
@@ -123,36 +141,37 @@ function storeData() {
         }
       }
     candidates = []
-    for (let i = 0; i < n; ++i) if (possible[i]) candidates.push(emojis[i])
-    for (let i = 0; i < n; ++i) {
-      if (!possible[i]) continue
-      console.log(
-        `Choose ${emojis[i]} with ${100 / candidates.length}% confidence`,
-      )
-      await page.click(`:nth-match(input, ${i + 1})`)
-      await sleep(1000)
-      await page.click('button')
-      await page.waitForSelector('.alert')
-      const info = await page.innerText('.alert')
-      if (info.match(/正确/)) {
-        streak++
-        console.log(`Correct✅! Current streak: ${emojifyNumber(streak)}`)
-        for (let j = 0; j < n; ++j) {
-          if (j != i) {
-            addPair(emojis[i], emojis[j])
-          }
-        }
-      } else {
-        streak = 0
-        console.log(`Wrong❌! Current streak: ${emojifyNumber(streak)}`)
-        if (candidates.length == 2) {
-          for (let other of candidates)
-            if (other != emojis[i]) addPair(other, emojis[i])
+    let most_probable_emoji = -1
+    for (let i = 0; i < n; ++i) if (possible[i]) {
+      candidates.push(i)
+      if (most_probable_emoji == -1 || smaller.get(emojis[most_probable_emoji]).size < smaller.get(emojis[i]).size)
+        most_probable_emoji = i
+    }
+    console.log(
+      `Choose ${emojis[most_probable_emoji]} with ${Math.round(100 / candidates.length)}% confidence`,
+    )
+    await page.click(`:nth-match(input, ${most_probable_emoji + 1})`)
+    await sleep(1000)
+    await page.click('button')
+    await page.waitForSelector('.alert')
+    const info = await page.innerText('.alert')
+    if (info.match(/正确/)) {
+      streak++
+      console.log(`Correct✅! Current streak: ${emojifyNumber(streak)}`)
+      for (let j = 0; j < n; ++j) {
+        if (j != most_probable_emoji) {
+          addPair(emojis[most_probable_emoji], emojis[j])
         }
       }
-      console.log('--------------------------------')
-      break
+    } else {
+      streak = 0
+      console.log(`Wrong❌! Current streak: ${emojifyNumber(streak)}`)
+      if (candidates.length == 2) {
+        for (let other of candidates)
+          if (other != most_probable_emoji) addPair(emojis[other], emojis[most_probable_emoji])
+      }
     }
+    console.log('--------------------------------')
   }
 
   await page.click('button')
