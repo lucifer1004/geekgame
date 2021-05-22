@@ -1,6 +1,21 @@
 # Future Machine
 
-A simple encoder/decoder.
+A simple encoder/decoder. You can either build it locally or install the package via `wapm`.
+
+## Running locally
+
+```shell
+cargo run --release -- [FLAGS] [OPTIONS] <input>
+```
+
+## Installation via wapm
+
+```shell
+wapm install -g lucifer1004/future-machine # Install wapm first if you do not have it installed.
+wapm run future-machine -- [FLAGS] [OPTIONS] <input>
+```
+
+## Usage
 
 ```shell
 USAGE:
@@ -20,4 +35,3 @@ OPTIONS:
         --mul <mul>          The multiplication factor [default: 1919]
     -o, --offset <offset>    The offset [default: 7]
 ```
-
