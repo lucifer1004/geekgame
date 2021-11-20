@@ -1,0 +1,11 @@
+{
+  "name": "json-as-a-service",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "helmet": "^4.6.0"
+  }
+}
