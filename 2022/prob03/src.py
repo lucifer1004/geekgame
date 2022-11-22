@@ -383,6 +383,12 @@ def main():
     for entry in mapsizes:
         map, Start, End, Teleports = GenerateSolution(
             entry[0], entry[1], entry[2])
+
+        for lvl in map:
+            for row in lvl:
+                print(''.join(row))
+            print()
+
         level += 1
         # SaveFullMap(map, counter)
         # DisplayFullMap(map)
