@@ -19,3 +19,4 @@
 - [381654729](./prob16/README.md)
 - [扫雷 II](./prob14/README.md)
 - [乱码还原](./prob18/README.md)
+- [方程组](./prob11/README.md)
