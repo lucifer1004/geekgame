@@ -14,6 +14,10 @@
 - [Flag Checker](./prob15/README.md)
 - [我用108天录了个音](./prob02/README.md)
 
+### Web
+
+- [给钱不要](./prob06/README.md)
+
 ### Algorithm
 
 - [381654729](./prob16/README.md)
