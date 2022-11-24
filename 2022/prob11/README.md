@@ -12,4 +12,6 @@
 
 ## Flag 3
 
-没做出来。
+> 第二阶段提示后完成。
+
+根据提示，使用 `Mathematica` 的 `LatticeReduce` 进行求解得到了[结果](./flag3.nb)。
